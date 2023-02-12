@@ -23,7 +23,7 @@ export async function gptEmbedding(input: string): Promise<number[]> {
 }
 
 
-export async function gptCompletion(prompt: string, stop: string[]): Promise<string> {
+export async function gptCompletion(prompt: string): Promise<string> {
     const max_retry = 5;
     let retry = 0;
     prompt = prompt.replace(/[^\x00-\x7F]/g, "");
@@ -37,7 +37,7 @@ export async function gptCompletion(prompt: string, stop: string[]): Promise<str
                 top_p: 1.0,
                 frequency_penalty: 0.0,
                 presence_penalty: 0.0,
-                stop
+                stop: ['ASKISLAM', 'USER']
             });
             if (!response?.data?.choices || response?.data?.choices.length === 0) {
                 return 'GPT3 error: No response';
@@ -49,7 +49,7 @@ export async function gptCompletion(prompt: string, stop: string[]): Promise<str
         } catch (error) {
             retry += 1;
             if (retry >= max_retry) {
-                return `GPT3 error: ${error}`;
+                throw new Error(`GPT3 error: ${error}`);
             }
             console.log(`Error communicating with OpenAI: ${error}`);
             await new Promise(resolve => setTimeout(resolve, 1000));
